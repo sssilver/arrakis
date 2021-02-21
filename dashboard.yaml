@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard-tunnel
+  namespace: argotunnel
+  labels:
+    app: dashboard-tunnel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-tunnel
+  template:
+    metadata:
+      labels:
+        app: dashboard-tunnel
+    spec:
+      containers:
+        - name: dashboard-tunnel
+          # Image from https://hub.docker.com/r/cloudflare/cloudflared
+          image: cloudflare/cloudflared:2021.2.2
+          command: ["cloudflared", "tunnel"]
+          args: ["--config", "/etc/tunnel/config.yaml", "run"]
+          ports:
+          - containerPort: 5000
+          livenessProbe:
+            tcpSocket:
+              port: 5000
+            initialDelaySeconds: 60
+            periodSeconds: 60
+          volumeMounts:
+          - name: dashboard-tunnel-config
+            mountPath: /etc/tunnel
+          - name: tunnel-credentials
+            mountPath: /etc/credentials
+      volumes:
+      - name: dashboard-tunnel-config
+        configMap:
+          name: dashboard-tunnel-config
+      - name: tunnel-credentials
+        secret:
+          secretName: tunnel-credentials
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-tunnel-config
+  namespace: argotunnel
+data:
+  config.yaml: |
+    tunnel: e80c63fc-6f36-4707-9ab1-b5ccbe3e479d
+    credentials-file: /etc/credentials/arrakis-ingress.json
+    metrics: :5000
+    protocol: http2
+    no-autoupdate: true
+    ingress:
+    - service: https://kubernetes-dashboard.kube-system.svc.cluster.local
+      hostname: dashboard-arrakis.x17.space
+      originRequest:
+        noTLSVerify: true
+    - service: http_status:404
+
