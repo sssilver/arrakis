@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dashboard-tunnel
+  name: arrakis-tunnel
   namespace: argotunnel
   labels:
-    app: dashboard-tunnel
+    app: arrakis-tunnel
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dashboard-tunnel
+      app: arrakis-tunnel
   template:
     metadata:
       labels:
-        app: dashboard-tunnel
+        app: arrakis-tunnel
     spec:
       containers:
-        - name: dashboard-tunnel
+        - name: arrakis-tunnel
           # Image from https://hub.docker.com/r/cloudflare/cloudflared
           image: cloudflare/cloudflared:2021.2.2
           command: ["cloudflared", "tunnel"]
@@ -29,14 +29,14 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 60
           volumeMounts:
-          - name: dashboard-tunnel-config
+          - name: arrakis-tunnel-config
             mountPath: /etc/tunnel
           - name: tunnel-credentials
             mountPath: /etc/credentials
       volumes:
-      - name: dashboard-tunnel-config
+      - name: arrakis-tunnel-config
         configMap:
-          name: dashboard-tunnel-config
+          name: arrakis-tunnel-config
       - name: tunnel-credentials
         secret:
           secretName: tunnel-credentials
@@ -44,7 +44,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dashboard-tunnel-config
+  name: arrakis-tunnel-config
   namespace: argotunnel
 data:
   config.yaml: |
@@ -54,6 +54,8 @@ data:
     protocol: http2
     no-autoupdate: true
     ingress:
+    - service: http://hello-world.default.svc.cluster.local
+      hostname: hello.catoo.dev
     - service: https://kubernetes-dashboard.kube-system.svc.cluster.local
       hostname: dashboard-arrakis.x17.space
       originRequest:
