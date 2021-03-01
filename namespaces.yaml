@@ -1,0 +1,13 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: argotunnel
+  labels:
+    name: argotunnel
+
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: jenkins
+  labels:
+    name: jenkins

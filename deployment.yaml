@@ -54,6 +54,8 @@ data:
     protocol: http2
     no-autoupdate: true
     ingress:
+    - service: http://jenkins.jenkins.svc.cluster.local:8080
+      hostname: jenkins-new.catoo.dev
     - service: http://hello-world.default.svc.cluster.local
       hostname: hello.catoo.dev
     - service: https://kubernetes-dashboard.kube-system.svc.cluster.local
