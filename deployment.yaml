@@ -18,7 +18,7 @@ spec:
       containers:
         - name: arrakis-tunnel
           # Image from https://hub.docker.com/r/cloudflare/cloudflared
-          image: cloudflare/cloudflared:2021.4.0
+          image: cloudflare/cloudflared:2022.1.2
           command: ["cloudflared", "tunnel"]
           args: ["--config", "/etc/tunnel/config.yaml", "run"]
           ports:
@@ -64,5 +64,9 @@ data:
       hostname: dashboard-arrakis.x17.space
       originRequest:
         noTLSVerify: true
+    - service: http://artifactory-artifactory-nginx.artifactory.svc.cluster.local
+      hostname: artifactory.catoo.dev
+    - service: http://writefreely.writefreely.svc.cluster.local:8080
+      hostname: mission1701.com
     - service: http_status:404
 

@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: writefreely
+  namespace: writefreely
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: writefreely
+  template:
+    metadata:
+      labels:
+        app: writefreely
+    spec:
+      containers:
+      - name: writefreely
+        image: writeas/writefreely
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: config-volume
+          mountPath: /go/config.ini
+          subPath: config.ini
+        - name: workdir
+          mountPath: /go/keys
+        - name: sqlite
+          mountPath: /usr/db
+        ports:
+        - containerPort: 8080
+      initContainers:
+      - name: install
+        image: writeas/writefreely
+        imagePullPolicy: Always
+        command:
+        - "/bin/sh"
+        - "-c"
+        args:
+        - >-
+            ./cmd/writefreely/writefreely --init-db &&
+            ./cmd/writefreely/writefreely keys generate &&
+            ./cmd/writefreely/writefreely --create-admin silver:Angel || :
+        volumeMounts:
+        - name: config-volume
+          mountPath: /go/config.ini
+          subPath: config.ini
+        - name: workdir
+          mountPath: /go/keys
+        - name: sqlite
+          mountPath: /usr/db
+      volumes:
+      - name: workdir
+        emptyDir: {}
+      - name: config-volume
+        configMap:
+          name: writefreely-config
+          items:
+          - key: config.ini
+            path: config.ini
+      - name: nginx-config
+        configMap:
+          name: nginxconfig
+          volumes:
+      - name: sqlite
+        persistentVolumeClaim:
+          claimName: sqlite-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: writefreely
+  namespace: writefreely
+spec:
+  selector:
+    app: writefreely
+  ports:
+  - protocol: TCP
+    port: 8080
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sqlite-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: writefreely-config
+  namespace: writefreely
+data:
+  config.ini: |
+    [server]
+    hidden_host =
+    port        = 8080
+    bind        = 0.0.0.0
+    [database]
+    type     = sqlite3
+    filename = /usr/db/writefreely.sqlite3
+    [app]
+    site_name         = Mission 1701
+    host              = https://mission1701.com
+    theme             = write
+    disable_js        = false
+    webfonts          = true
+    single_user       = true
+    open_registration = false
+    min_username_len  = 3
+    max_blogs         = 1
+    federation        = true
+    public_stats      = true
+    private           = false
+    update_checks     = true

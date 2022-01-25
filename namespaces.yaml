@@ -23,3 +23,29 @@ metadata:
   labels:
     name: db
 
+---
+
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: writefreely
+  labels:
+    name: writefreely
+
+---
+
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: plume
+  labels:
+    name: plume
+
+---
+
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: artifactory
+  labels:
+    name: artifactory
