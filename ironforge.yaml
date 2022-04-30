@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ironforge-tunnel
+  namespace: argotunnel
+  labels:
+    app: ironforge-tunnel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ironforge-tunnel
+  template:
+    metadata:
+      labels:
+        app: ironforge-tunnel
+    spec:
+      containers:
+        - name: ironforge-tunnel
+          # Image from https://hub.docker.com/r/cloudflare/cloudflared
+          image: cloudflare/cloudflared:2022.4.1
+          command: ["cloudflared", "tunnel"]
+          args: ["--config", "/etc/tunnel/config.yaml", "run"]
+          ports:
+          - containerPort: 5000
+          livenessProbe:
+            tcpSocket:
+              port: 5000
+            initialDelaySeconds: 60
+            periodSeconds: 60
+          volumeMounts:
+          - name: ironforge-tunnel-config
+            mountPath: /etc/tunnel
+          - name: tunnel-credentials
+            mountPath: /etc/credentials
+      volumes:
+      - name: ironforge-tunnel-config
+        configMap:
+          name: ironforge-tunnel-config
+      - name: tunnel-credentials
+        secret:
+          secretName: tunnel-credentials
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ironforge-tunnel-config
+  namespace: argotunnel
+data:
+  config.yaml: |
+    tunnel: f562a054-f138-4667-8799-3f5f9e996eae
+    credentials-file: /etc/credentials/ironforge-ingress.json
+    metrics: :5000
+    protocol: http2
+    no-autoupdate: true
+    warp-routing:
+      enabled: true
+    ingress:
+    - service: http://jenkins.jenkins.svc.cluster.local:8080
+      hostname: jenkins.catoo.dev
+    - service: http://hello-world.default.svc.cluster.local
+      hostname: hello-ironforge.x17.space
+    - service: https://kubernetes-dashboard.kube-system.svc.cluster.local
+      hostname: dashboard-ironforge.x17.space
+      originRequest:
+        noTLSVerify: true
+    - service: http://artifactory-artifactory-nginx.artifactory.svc.cluster.local
+      hostname: artifactory.catoo.dev
+    - service: http://writefreely.writefreely.svc.cluster.local:8080
+      hostname: mission1701.com
+    - service: http_status:404
+

@@ -10,6 +10,15 @@ metadata:
 kind: Namespace
 apiVersion: v1
 metadata:
+  name: velero
+  labels:
+    name: velero
+
+---
+
+kind: Namespace
+apiVersion: v1
+metadata:
   name: jenkins
   labels:
     name: jenkins
@@ -31,15 +40,6 @@ metadata:
   name: writefreely
   labels:
     name: writefreely
-
----
-
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: plume
-  labels:
-    name: plume
 
 ---
 
