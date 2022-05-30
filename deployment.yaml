@@ -18,7 +18,7 @@ spec:
       containers:
         - name: arrakis-tunnel
           # Image from https://hub.docker.com/r/cloudflare/cloudflared
-          image: cloudflare/cloudflared:2022.1.2
+          image: cloudflare/cloudflared:2022.5.1
           command: ["cloudflared", "tunnel"]
           args: ["--config", "/etc/tunnel/config.yaml", "run"]
           ports:
