@@ -51,7 +51,6 @@ data:
     tunnel: e80c63fc-6f36-4707-9ab1-b5ccbe3e479d
     credentials-file: /etc/credentials/arrakis-ingress.json
     metrics: :5000
-    protocol: http2
     no-autoupdate: true
     warp-routing:
       enabled: true
